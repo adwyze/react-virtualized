@@ -1,7 +1,7 @@
 /** @flow */
 import Immutable from 'immutable';
 import PropTypes from 'prop-types';
-import React, {PureComponent} from 'react';
+import React, {PureComponent, Children} from 'react';
 import {
   ContentBox,
   ContentBoxHeader,
@@ -11,6 +11,7 @@ import {LabeledInput, InputRow} from '../demo/LabeledInput';
 import AutoSizer from '../AutoSizer';
 import MultiGrid from './MultiGrid';
 import styles from './MultiGrid.example.css';
+// import { Array } from 'core-js/library/web/timers';
 
 const STYLE = {
   border: '1px solid #ddd',
@@ -29,19 +30,121 @@ const STYLE_TOP_RIGHT_GRID = {
   fontWeight: 'bold',
 };
 
+console.log(Array(10))
+
+let Main
+
+
 export default class MultiGridExample extends PureComponent {
   static contextTypes = {
     list: PropTypes.instanceOf(Immutable.List).isRequired,
   };
 
+
+  getRawData = () => {
+    return Array(50).fill(0).map((d,i) => {
+      let tempData = Array(10).fill(0).map((dd,j) => {
+        return `${i}, ${j}`
+      })
+      return { 
+        data: tempData,
+        children: Array(5).fill(0).map((c,j)=> ({ data: Array(10).fill(0).map((da,k) => {
+          return `${i} ${j} ${k}`
+        }) })
+      ) 
+    }
+    })
+  }
+
+//   transformer = (data) => {
+//     const newData = []
+
+//     for(let i=0; i<data.length; i++) {
+//       newData.push(data[i])
+//       if(data[i].expanded) {
+//         newData.push(...data[i].children.map(child => (
+// {          data: child,
+//           level: 1,}
+//         )))
+//         // insert data.children between i and i+1 with level = currentLevel + 1
+//         //(0, i) , children, (i+1, n-1)
+//       }
+//     }
+
+//     return newData
+//   }
+
+
+  transformer2 = (data) => {
+    const newData = []
+
+    for(let i=0; i<data.length; i++) {
+      // insert data.children between i and i+1 with level = currentLevel + 1
+      this.recursion(data[i], newData, 0)
+    }
+
+    return newData
+  }
+
+
+
+  recursion = (data, newData, level) => {
+    data.level = level
+    data.drillDown = state => {
+      data.expanded = state
+      console.log(data)
+      console.log(Main)
+      this.info = this.transformer2(this.rawData)
+      // Main.measureAllCells()
+      this.setState({
+        rowCount: this.info.length
+      })
+      Main.recomputeGridSize()
+      Main.forceUpdateGrids()
+    }
+    newData.push(data)
+    // console.warn(data)
+    if(data.expanded) {
+      data.children.map(child => {
+        child.level = level+1
+        this.recursion(child, newData, level+1)
+    })
+  }
+}
+ 
+//   transformerMain = (data, newData, level) => {
+//     let last = data.pop()
+//     newData.push(last)
+//     if(last.expanded) {
+//       newData.push(...data[i].children.map(child => (
+//         {          data: child,
+//                   level: level+1,}
+//                 )))
+//         last.children ? transforMain(last.children, newData, level)
+//     }
+//     for(let i=0; i<data.length; i++) {
+//       newData.push(data[i])
+//       if(data[i].expanded) {
+//         newData.push(...data[i].children.map(child => (
+// {          data: child,
+//           level: 1,}
+//         )))
+//         // insert data.children between i and i+1 with level = currentLevel + 1
+//         //(0, i) , children, (i+1, n-1)
+//       }
+//     }
+
+//     return newData
+//   }
+
   constructor(props, context) {
     super(props, context);
-
     this.state = {
-      fixedColumnCount: 2,
+      fixedColumnCount: 1,
       fixedRowCount: 1,
       scrollToColumn: 0,
       scrollToRow: 0,
+      rowCount: 10,
     };
 
     this._cellRenderer = this._cellRenderer.bind(this);
@@ -53,7 +156,47 @@ export default class MultiGridExample extends PureComponent {
     this._onScrollToRowChange = this._createEventHandler('scrollToRow');
   }
 
+  drillDown = rowIndex => {
+    return () => {
+      console.log(rowIndex)  
+    }
+    // console.log(rowIndex)
+  }
+
+  setRef = ref => {
+    Main = ref
+  }
+
+  componentDidMount() {
+    const x = {fb_spend: 234, aw_cost: 22}
+    
+        this.rawData = this.getRawData()
+        // console.log(rawData)
+        
+        // this iwll be a function
+        this.rawData[0].expanded = true
+        this.rawData[1].expanded = true
+        this.rawData[1].children[0].expanded = true
+        this.rawData[1].children[0].children = [{data: [1,2,3,4,5]},{data: [11,22,33,41,51]}]
+        this.rawData[5].expanded = true
+        
+        this.info = this.transformer2(this.rawData)
+        this.setState({
+          rowCount: this.info.length
+        })
+        // console.log('newdata', this.info)
+        // console.warn(this.refs)
+        // assert(info.length, 55)
+  }
+
+  getRowCount = () => {
+    console.warn("here")
+    return this.info.length
+  }
+
   render() {
+    if(!this.info) return ""
+    // console.warn(this.info.length)
     return (
       <ContentBox>
         <ContentBoxHeader
@@ -83,18 +226,20 @@ export default class MultiGridExample extends PureComponent {
           {this._createLabeledInput('scrollToRow', this._onScrollToRowChange)}
         </InputRow>
 
-        <AutoSizer disableHeight>
-          {({width}) => (
+        <AutoSizer>
+          {({width, height}) => {
+            return (
             <MultiGrid
               {...this.state}
               cellRenderer={this._cellRenderer}
-              columnWidth={75}
-              columnCount={50}
+              columnWidth={200}
+              columnCount={10}
               enableFixedColumnScroll
+              ref={this.setRef}
               enableFixedRowScroll
               height={300}
               rowHeight={40}
-              rowCount={100}
+              rowCount={this.getRowCount()}
               style={STYLE}
               styleBottomLeftGrid={STYLE_BOTTOM_LEFT_GRID}
               styleTopLeftGrid={STYLE_TOP_LEFT_GRID}
@@ -102,15 +247,27 @@ export default class MultiGridExample extends PureComponent {
               width={width}
             />
           )}
+          }
         </AutoSizer>
       </ContentBox>
     );
   }
 
   _cellRenderer({columnIndex, key, rowIndex, style}) {
+    if(rowIndex === 0) {
+      return (
+        <div className={styles.Cell} key={key} style={style}>
+        { "some header" }
+      </div>
+      )
+    }
+    // console.warn(this.info[rowIndex].drillDown)
     return (
       <div className={styles.Cell} key={key} style={style}>
-        {columnIndex}, {rowIndex}
+         { (columnIndex===0 && this.info[rowIndex].children)
+          ? (this.info[rowIndex].expanded) ? <a onClick={() => this.info[rowIndex].drillDown(false)}>(-)</a> : <a onClick={() => this.info[rowIndex].drillDown(true)}>(+)</a>
+          : null }
+        { this.info[rowIndex].data[columnIndex] }
       </div>
     );
   }

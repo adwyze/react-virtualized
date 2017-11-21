@@ -9,6 +9,7 @@ import {
 import {LabeledInput, InputRow} from '../demo/LabeledInput';
 import AutoSizer from '../AutoSizer';
 import Grid from './Grid';
+import defaultCellRangeRenderer from "./defaultCellRangeRenderer"
 import cn from 'classnames';
 import styles from './Grid.example.css';
 
@@ -45,6 +46,14 @@ export default class GridExample extends PureComponent {
     this._renderLeftSideCell = this._renderLeftSideCell.bind(this);
   }
 
+  cellRangeRenderer = (props) => {
+    const children = defaultCellRangeRenderer(props)
+    children.push(
+      <div>My custom overlay</div>
+    )
+    console.log(children)
+    return children
+  }  
   render() {
     const {
       columnCount,
@@ -154,6 +163,7 @@ export default class GridExample extends PureComponent {
         <AutoSizer disableHeight>
           {({width}) => (
             <Grid
+            cellRangeRenderer={this.cellRangeRenderer}
               cellRenderer={this._cellRenderer}
               className={styles.BodyGrid}
               columnWidth={this._getColumnWidth}

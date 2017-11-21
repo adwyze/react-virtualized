@@ -18,7 +18,7 @@ export default class DynamicHeightGrid extends PureComponent {
     super(props, context);
 
     this._cache = new CellMeasurerCache({
-      defaultWidth: 150,
+      defaultWidth: 250,
       fixedWidth: true,
     });
 
@@ -32,7 +32,7 @@ export default class DynamicHeightGrid extends PureComponent {
       <Grid
         className={styles.BodyGrid}
         columnCount={50}
-        columnWidth={150}
+        columnWidth={250}
         deferredMeasurementCache={this._cache}
         height={400}
         overscanColumnCount={0}
@@ -63,7 +63,7 @@ export default class DynamicHeightGrid extends PureComponent {
           className={classNames}
           style={{
             ...style,
-            width: 150,
+            width: 250,
           }}>
           {content}
         </div>

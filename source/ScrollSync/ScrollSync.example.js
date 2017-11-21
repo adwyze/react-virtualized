@@ -22,12 +22,12 @@ export default class GridExample extends PureComponent {
     super(props, context);
 
     this.state = {
-      columnWidth: 75,
+      columnWidth: 175,
       columnCount: 50,
-      height: 300,
+      height: 600,
       overscanColumnCount: 0,
       overscanRowCount: 5,
-      rowHeight: 40,
+      rowHeight: 300,
       rowCount: 100,
     };
 
@@ -108,26 +108,6 @@ export default class GridExample extends PureComponent {
                     left: 0,
                     top: 0,
                     color: leftColor,
-                    backgroundColor: `rgb(${topBackgroundColor.r},${topBackgroundColor.g},${topBackgroundColor.b})`,
-                  }}>
-                  <Grid
-                    cellRenderer={this._renderLeftHeaderCell}
-                    className={styles.HeaderGrid}
-                    width={columnWidth}
-                    height={rowHeight}
-                    rowHeight={rowHeight}
-                    columnWidth={columnWidth}
-                    rowCount={1}
-                    columnCount={1}
-                  />
-                </div>
-                <div
-                  className={styles.LeftSideGridContainer}
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: rowHeight,
-                    color: leftColor,
                     backgroundColor: `rgb(${leftBackgroundColor.r},${leftBackgroundColor.g},${leftBackgroundColor.b})`,
                   }}>
                   <Grid
@@ -145,10 +125,10 @@ export default class GridExample extends PureComponent {
                   />
                 </div>
                 <div className={styles.GridColumn}>
-                  <AutoSizer disableHeight>
+                  <AutoSizer>
                     {({width}) => (
                       <div>
-                        <div
+                        {/* <div
                           style={{
                             backgroundColor: `rgb(${topBackgroundColor.r},${topBackgroundColor.g},${topBackgroundColor.b})`,
                             color: topColor,
@@ -159,15 +139,15 @@ export default class GridExample extends PureComponent {
                             className={styles.HeaderGrid}
                             columnWidth={columnWidth}
                             columnCount={columnCount}
-                            height={rowHeight}
+                            height={0}
                             overscanColumnCount={overscanColumnCount}
                             cellRenderer={this._renderHeaderCell}
-                            rowHeight={rowHeight}
+                            rowHeight={0}
                             rowCount={1}
                             scrollLeft={scrollLeft}
                             width={width - scrollbarSize()}
                           />
-                        </div>
+                        </div> */}
                         <div
                           style={{
                             backgroundColor: `rgb(${middleBackgroundColor.r},${middleBackgroundColor.g},${middleBackgroundColor.b})`,
@@ -206,7 +186,15 @@ export default class GridExample extends PureComponent {
       return;
     }
 
-    return this._renderLeftSideCell({columnIndex, key, rowIndex, style});
+    return (
+      <div key={key} style={style}>
+        <img src="https://pbs.twimg.com/profile_images/630664501776527361/nIK2xTUE.jpg" />
+        Hello people this is a cell
+        Hello people this is a cell
+      </div>
+    )
+
+    // return this._renderLeftSideCell({columnIndex, key, rowIndex, style});
   }
 
   _renderHeaderCell({columnIndex, key, rowIndex, style}) {
@@ -219,7 +207,7 @@ export default class GridExample extends PureComponent {
 
   _renderLeftHeaderCell({columnIndex, key, style}) {
     return (
-      <div className={styles.headerCell} key={key} style={style}>
+      <div key={key}>
         {`C${columnIndex}`}
       </div>
     );

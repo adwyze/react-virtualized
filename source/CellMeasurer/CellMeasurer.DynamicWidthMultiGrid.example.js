@@ -18,9 +18,8 @@ export default class DynamicWidthMultiGrid extends PureComponent {
     super(props, context);
 
     this._cache = new CellMeasurerCache({
-      defaultHeight: 30,
-      defaultWidth: 150,
-      fixedHeight: true,
+      defaultHeight: 250,
+      fixedWidth: true,
     });
 
     this._cellRenderer = this._cellRenderer.bind(this);
@@ -28,12 +27,12 @@ export default class DynamicWidthMultiGrid extends PureComponent {
 
   render() {
     const {width} = this.props;
-
+    console.warn(this._cache.rowHeight)
     return (
       <MultiGrid
         className={styles.BodyGrid}
         columnCount={50}
-        columnWidth={this._cache.columnWidth}
+        columnWidth={200}
         deferredMeasurementCache={this._cache}
         fixedColumnCount={1}
         fixedRowCount={0}
@@ -42,7 +41,7 @@ export default class DynamicWidthMultiGrid extends PureComponent {
         overscanRowCount={0}
         cellRenderer={this._cellRenderer}
         rowCount={50}
-        rowHeight={30}
+        rowHeight={this._cache.rowHeight}
         width={width}
       />
     );
@@ -70,7 +69,6 @@ export default class DynamicWidthMultiGrid extends PureComponent {
           className={classNames}
           style={{
             ...style,
-            whiteSpace: 'nowrap',
           }}>
           {content}
         </div>

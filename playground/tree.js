@@ -91,6 +91,7 @@ var RANDOM_WORDS = [
 var data = createRandomizedData();
 
 function renderItem(item, keyPrefix) {
+  console.log(item, keyPrefix)
   var onClick = function(event) {
     event.stopPropagation();
     item.expanded = !item.expanded;
@@ -152,7 +153,6 @@ function setRef(ref) {
 
 function cellRenderer(params) {
   var renderedCell = renderItem(data[params.index], params.index);
-
   return React.DOM.ul(
     {
       key: params.key,
