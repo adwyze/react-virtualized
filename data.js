@@ -1,9 +1,3 @@
-/** @flow */
-import MultiGrid from './MultiGrid';
-
-export default MultiGrid;
-export {MultiGrid};
-
 export const sData = {
     "data": [
       {
@@ -1418,44 +1412,5 @@ export const processedData = sData.data.map((data) => {
       row.push(data[col])
     }
   })
-  return {data: [dimension, ...row]}
-})
-
-
-export const drillSdata = {
-  "data": [
-    {
-      "fb_spend": 0,
-      "spend": 0,
-      "aor_spend": 0,
-      "groups": {
-        "Ad Type": {
-          "name": "None",
-          "source": "AUTO"
-        }
-      }
-    },
-    {
-      "fb_spend": 0,
-      "spend": 0,
-      "aor_spend": 0,
-      "groups": {
-        "Ad Type": {
-          "name": "Regular",
-          "source": "AUTO"
-        }
-      }
-    }
-  ]
-}
-
-export const dprocessedData = drillSdata.data.map((data) => {
-  let row = []
-  let dimension = data.groups["Ad Type"]
-  columns.forEach((col,i) => {
-    if(i) {
-      row.push(data[col])
-    }
-  })
-  return {data: [dimension, ...row]}
+  return [dimension, ...row]
 })
