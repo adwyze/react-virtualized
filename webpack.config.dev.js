@@ -36,6 +36,11 @@ const config = {
         test: /\.css$/,
         loaders: ['style', 'css?importLoaders=1&minimize=false'],
         include: path.join(__dirname, 'styles.css')
+      },
+      {
+        test: /\.css$/,
+        loaders: ['style', 'css'],
+        include: path.join(__dirname, 'node_modules')
       }
     ]
   },
