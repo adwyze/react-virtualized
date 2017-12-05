@@ -2,6 +2,9 @@
 import Immutable from 'immutable';
 import PropTypes from 'prop-types';
 import React, {PureComponent, Children} from 'react';
+import Popover from 'antd/lib/popover';
+import 'antd/dist/antd.css';
+
 import {
   ContentBox,
   ContentBoxHeader,
@@ -99,7 +102,8 @@ export default class Table extends PureComponent {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      breakdowns: ["Ad Type", "Hour"]
+      breakdowns: ["Ad Type", "Hour"],
+      visible: false,
     };
     this._cellRenderer = this._cellRenderer.bind(this);
   }
@@ -154,6 +158,10 @@ export default class Table extends PureComponent {
     );
   }
 
+  handleVisibleChange = (visible) => {
+    this.setState({ visible });
+  }
+
   _cellRenderer({columnIndex, key, rowIndex, style}) {
     const breakdownLevel = this.state.breakdowns.length
     if (rowIndex === 0) {
@@ -164,21 +172,43 @@ export default class Table extends PureComponent {
       );
     }
     rowIndex -= 1;
-    const name = (this.info[rowIndex].data[columnIndex].name
+    //  extract name from matrix with given col index and row index
+    let name = (this.info[rowIndex].data[columnIndex].name
     ? this.info[rowIndex].data[columnIndex].metadata
       ? this.info[rowIndex].data[columnIndex].metadata.name
       : this.info[rowIndex].data[columnIndex].name
     : this.info[rowIndex].data[columnIndex])
+    let flag = false
+    if(name.length > 45) {
+      name = name.slice(0,42)
+      flag = true
+    }
     return (
       <div className={styles.Cell} key={key} style={style}>
         {columnIndex === 0 && this.info[rowIndex].level < breakdownLevel ? (
           this.info[rowIndex].expanded ? (
-            <a onClick={() => this.info[rowIndex].drillDown(false, name)}>(-)</a>
+            <a className={styles.breakdownIcon} onClick={() => this.info[rowIndex].drillDown(false, name)}>(-)</a>
           ) : (
-            <a onClick={() => this.info[rowIndex].drillDown(true, name)}>(+)</a>
+            <a className={styles.breakdownIcon} onClick={() => this.info[rowIndex].drillDown(true, name)}>(+)</a>
           )
         ) : null}
-        {name}
+        <span className="cellData">
+          {name} {flag ? (
+            <Popover
+        content={(
+          <div>
+            <p>Content</p>
+            <p>Content</p>
+          </div>
+        )}
+        trigger="click"
+        visible={this.state.visible}
+        onVisibleChange={this.handleVisibleChange}
+      >
+      ...
+      </Popover>
+          ) : null}
+        </span>
       </div>
     );
   }
