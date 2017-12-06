@@ -1,9 +1,12 @@
 /** @flow */
 import Immutable from 'immutable';
 import PropTypes from 'prop-types';
-import React, {PureComponent, Children} from 'react';
-import Popover from 'antd/lib/popover';
-import 'antd/dist/antd.css';
+import React, {PureComponent, Children, Component} from 'react';
+import {Popover} from 'antd';
+// import 'antd/dist/antd.css';
+import Draggable from 'react-draggable';
+import { Resizable, ResizableBox } from 'react-resizable';
+// import 'font-awesome/css/font-awesome.min.css';
 
 import {
   ContentBox,
@@ -15,6 +18,7 @@ import AutoSizer from '../AutoSizer';
 import MultiGrid from './MultiGrid';
 import styles from './MultiGrid.example.css';
 import {columns, processedData, dprocessedData } from './index';
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
 
 const STYLE = {
   border: '1px solid #ddd',
@@ -38,6 +42,15 @@ const STYLE_TOP_RIGHT_GRID = {
 
 
 let Main;
+
+const SortableItem = SortableElement(({value, styles, style, key}) => {
+  return (
+    <div className={styles.headerCell} key={key} style={style}>
+      {value}
+      <div className={styles.headerResizeBar}></div>
+    </div>
+  )
+})
 
 // props
 // breakdowns array
@@ -128,12 +141,27 @@ export default class Table extends PureComponent {
     if (!this.info) return null;
     return (
       <ContentBox>
+        <ContentBoxParagraph>
+          <button onClick={() => {
+            this.setState({
+              i: 2,
+              width: this.state.width ? this.state.width+1 : 200
+            })
+            Main.recomputeGridSize();
+          }}>  click here to resize </button>
+        </ContentBoxParagraph>
         <AutoSizer>
           {({width, height}) => {
             return (
               <MultiGrid
                 cellRenderer={this._cellRenderer}
                 columnWidth={({index}) => {
+                  const {i, width } = this.state;
+                  // console.log("index is", index, i, width)
+                  if(i && i===index) {
+                    // console.log("here")
+                    return width
+                  }
                   return 200
                 }}
                 fixedRowCount={1}
@@ -166,9 +194,35 @@ export default class Table extends PureComponent {
     const breakdownLevel = this.state.breakdowns.length
     if (rowIndex === 0) {
       return (
-        <div className={styles.Cell} key={key} style={style}>
-          {columns[columnIndex]}
-        </div>
+        <Draggable
+        axis="x"
+        handle="#test"
+        position={{
+          x: 0,
+          y: this.state.y
+        }}
+        onStart={(e,data) => console.warn("start", data)}
+        onDrag={(e, data) => {
+          // console.warn("movin bitch", data)
+          console.warn("test",200+data.x,data)
+          this.setState({
+            i: columnIndex,
+            width: this.state.fixedWidth ? this.state.fixedWidth+(data.x*1) : 200+(data.x*1),
+            y: data.y
+          })
+          Main.recomputeGridSize();
+        }}
+        onStop={(e,data) => {
+          let wid = this.state.fixedWidth ? this.state.fixedWidth+(data.x*1) : 200+(data.x*1)
+          this.setState({
+            fixedWidth: wid
+          })
+        }}>
+          <div className={styles.headerCell} key={key} style={{...style, color: "green"}}>
+            {columns[columnIndex]}
+            <div  id="test" className={styles.headerResizeBar}></div>
+          </div>
+        </Draggable>
       );
     }
     rowIndex -= 1;
@@ -178,39 +232,54 @@ export default class Table extends PureComponent {
       ? this.info[rowIndex].data[columnIndex].metadata.name
       : this.info[rowIndex].data[columnIndex].name
     : this.info[rowIndex].data[columnIndex])
+    let newname
     let flag = false
-    if(name.length > 45) {
-      name = name.slice(0,42)
+    if(name.length > 40) {
+      newname = name.slice(0,36)
       flag = true
+    } else {
+      newname = name
     }
     return (
-      <div className={styles.Cell} key={key} style={style}>
-        {columnIndex === 0 && this.info[rowIndex].level < breakdownLevel ? (
-          this.info[rowIndex].expanded ? (
-            <a className={styles.breakdownIcon} onClick={() => this.info[rowIndex].drillDown(false, name)}>(-)</a>
-          ) : (
-            <a className={styles.breakdownIcon} onClick={() => this.info[rowIndex].drillDown(true, name)}>(+)</a>
-          )
+      <div className={styles.Cell} key={key} style={{...style, paddingLeft: 10*this.info[rowIndex].level + 10 }}>
+      {columnIndex === 0 && this.info[rowIndex].level < breakdownLevel ? (
+        this.info[rowIndex].expanded ? (
+          <a className={styles.breakdownIcon} onClick={() => this.info[rowIndex].drillDown(false, name)}><i className="fa fa-angle-right" aria-hidden="true"></i></a>
+        ) : (
+          <a className={styles.breakdownIcon} onClick={() => this.info[rowIndex].drillDown(true, name)}><i className="fa fa-angle-down" aria-hidden="true"></i></a>
+        )
+      ) : null}
+      <span className="cellData">
+        {newname} {flag ? (
+          <Popover
+      content={(
+        <div className={styles.popup}>
+          {name}
+        </div>
+      )}
+      trigger="click"
+    >
+    <a>...</a>
+    </Popover>
         ) : null}
-        <span className="cellData">
-          {name} {flag ? (
-            <Popover
-        content={(
-          <div>
-            <p>Content</p>
-            <p>Content</p>
-          </div>
-        )}
-        trigger="click"
-        visible={this.state.visible}
-        onVisibleChange={this.handleVisibleChange}
-      >
-      ...
-      </Popover>
-          ) : null}
-        </span>
-      </div>
+      </span>
+    </div>
     );
   }
 
+}
+
+const SortableMultiGrid = SortableContainer(Table, {withRef: true})
+
+export class SortableComponent extends Component {
+  onSortEnd = () => {
+    console.warn("sorting ended")
+  }
+  render() {
+    return (
+      <SortableMultiGrid
+        onSortEnd={this.onSortEnd}
+      />
+    )
+  }
 }

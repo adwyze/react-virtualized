@@ -1,13 +1,46 @@
 .Cell {
   display: flex;
-  align-items: center;
   justify-content: flex-start;
-  padding: 10px;
+  padding: 5px;
   border-left:  1px solid #eee;
   border-top:  1px solid #eee;  
   border-right: 1px solid #eee;
+  font-size: 12px;
+  color: black !important;
+}
+
+.cellData {
+  color: black !important;
 }
 
 .breakdownIcon {
   margin-right: 4px;
+  font-size: 12px;  
+}
+
+.popup {
+  width: 200px;
+  font-size: 12px;
+}
+
+.headerCell {
+  display: flex;
+  justify-content: flex-start;
+  padding: 5px;
+  font-size: 12px;
+}
+
+.headerResizeBar {
+  height: 100%;
+  width: 2px;
+  cursor: ew-resize;
+  position: absolute;
+  /* background-color: red; */
+  border-left: 2px solid red;
+  right: 0;
+  top: 0;
+}
+
+.headerResizeBar::selection {
+  color: green !important;
 }
