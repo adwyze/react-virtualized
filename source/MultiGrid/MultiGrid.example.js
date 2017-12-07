@@ -43,14 +43,6 @@ const STYLE_TOP_RIGHT_GRID = {
 
 let Main;
 
-const SortableItem = SortableElement(({value, styles, style, key}) => {
-  return (
-    <div className={styles.headerCell} key={key} style={style}>
-      {value}
-      <div className={styles.headerResizeBar}></div>
-    </div>
-  )
-})
 
 // props
 // breakdowns array
@@ -141,15 +133,6 @@ export default class Table extends PureComponent {
     if (!this.info) return null;
     return (
       <ContentBox>
-        <ContentBoxParagraph>
-          <button onClick={() => {
-            this.setState({
-              i: 2,
-              width: this.state.width ? this.state.width+1 : 200
-            })
-            Main.recomputeGridSize();
-          }}>  click here to resize </button>
-        </ContentBoxParagraph>
         <AutoSizer>
           {({width, height}) => {
             return (
@@ -213,6 +196,7 @@ export default class Table extends PureComponent {
           Main.recomputeGridSize();
         }}
         onStop={(e,data) => {
+          console.warn("stop")
           let wid = this.state.fixedWidth ? this.state.fixedWidth+(data.x*1) : 200+(data.x*1)
           this.setState({
             fixedWidth: wid
@@ -267,19 +251,4 @@ export default class Table extends PureComponent {
     );
   }
 
-}
-
-const SortableMultiGrid = SortableContainer(Table, {withRef: true})
-
-export class SortableComponent extends Component {
-  onSortEnd = () => {
-    console.warn("sorting ended")
-  }
-  render() {
-    return (
-      <SortableMultiGrid
-        onSortEnd={this.onSortEnd}
-      />
-    )
-  }
 }
