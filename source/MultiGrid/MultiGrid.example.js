@@ -148,6 +148,7 @@ export default class Table extends PureComponent {
                 cellRenderer={this._cellRenderer}
                 columnWidth={({index}) => {
                   const { dimensions } = this.state;
+                  console.warn("here", dimensions, index)
                   return dimensions[index] ? dimensions[index].width : 200
                 }}
                 fixedRowCount={1}
@@ -190,26 +191,48 @@ export default class Table extends PureComponent {
         }}
         onStart={(e,data) => console.warn("start", data)}
         onDrag={(e, data) => {
-          console.warn(dimensions,"movin bitch",{
-            ...dimensions,
-            [columnIndex]: {
-              width: (!_.isUndefined(dimensions[columnIndex].fixedWidth)) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
-            }
-            }, dimensions[columnIndex] && dimensions[columnIndex].fixedWidth)
+          // console.warn(dimensions,"movin bitch",{
+          //   ...dimensions,
+          //   [columnIndex]: {
+          //     width: (!_.isUndefined(dimensions[columnIndex].fixedWidth)) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
+          //   }
+          //   }, dimensions[columnIndex] && dimensions[columnIndex].fixedWidth)
           // console.warn("test",200+data.x,data)
+          // console.log("hey",dimensions[columnIndex], dimensions)
+          console.warn((dimensions[columnIndex] && dimensions[columnIndex].fixedWidth) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1))
           this.setState({
             dimensions: {
               ...dimensions,
               [columnIndex]: {
-                width: (!_.isUndefined(dimensions[columnIndex].fixedWidth)) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
+                ...dimensions[columnIndex],
+                width: (dimensions[columnIndex] && dimensions[columnIndex].fixedWidth) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
               },
             },
             y: data.y
           })
+          // console.warn(columnIndex , dimensions[columnIndex] && dimensions[columnIndex].fixedWidth, dimensions[columnIndex].fixedWidth, {
+          //   dimensions: {
+          //     ...dimensions,
+          //     [columnIndex]: {
+          //       ...dimensions[columnIndex],
+          //       width: (dimensions[columnIndex] && dimensions[columnIndex].fixedWidth) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
+          //     },
+          //   },
+          //   y: data.y
+          // })
           Main.recomputeGridSize();
         }}
         onStop={(e,data) => {
           console.warn("stop")
+          this.setState({
+            dimensions: {
+              ...dimensions,
+              [columnIndex]: {
+                ...dimensions[columnIndex],
+                fixedWidth: (dimensions[columnIndex] && dimensions[columnIndex].fixedWidth) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
+              },
+            }
+          })
         }}>
           <div className={styles.headerCell} key={key} style={{...style, color: "green"}}>
             {columns[columnIndex]}
