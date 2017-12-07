@@ -261,7 +261,3 @@ export default class Table extends PureComponent {
   }
 
 }
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
