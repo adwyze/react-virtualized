@@ -5,6 +5,7 @@ import React, {PureComponent, Children, Component} from 'react';
 import {Popover} from 'antd';
 // import 'antd/dist/antd.css';
 import Draggable from 'react-draggable';
+import _ from "lodash";
 import { Resizable, ResizableBox } from 'react-resizable';
 // import 'font-awesome/css/font-awesome.min.css';
 
@@ -18,7 +19,6 @@ import AutoSizer from '../AutoSizer';
 import MultiGrid from './MultiGrid';
 import styles from './MultiGrid.example.css';
 import {columns, processedData, dprocessedData } from './index';
-import { SortableContainer, SortableElement } from "react-sortable-hoc";
 
 const STYLE = {
   border: '1px solid #ddd',
@@ -109,6 +109,8 @@ export default class Table extends PureComponent {
     this.state = {
       breakdowns: ["Ad Type", "Hour"],
       visible: false,
+      // contains the width of each header element used for resizing
+      dimensions: {}, 
     };
     this._cellRenderer = this._cellRenderer.bind(this);
   }
@@ -118,6 +120,7 @@ export default class Table extends PureComponent {
   };
 
   componentDidMount() {
+    //  transform initial data into table matrics
     this.info = this.transformerData(processedData);
   }
 
@@ -129,7 +132,12 @@ export default class Table extends PureComponent {
     return 1
   }
 
+  getColumnWidth = (index) => {
+
+  }
+
   render() {
+    // if info is undefiened 
     if (!this.info) return null;
     return (
       <ContentBox>
@@ -139,13 +147,8 @@ export default class Table extends PureComponent {
               <MultiGrid
                 cellRenderer={this._cellRenderer}
                 columnWidth={({index}) => {
-                  const {i, width } = this.state;
-                  // console.log("index is", index, i, width)
-                  if(i && i===index) {
-                    // console.log("here")
-                    return width
-                  }
-                  return 200
+                  const { dimensions } = this.state;
+                  return dimensions[index] ? dimensions[index].width : 200
                 }}
                 fixedRowCount={1}
                 fixedColumnCount={this.getFixedColumnCount()}
@@ -175,6 +178,7 @@ export default class Table extends PureComponent {
 
   _cellRenderer({columnIndex, key, rowIndex, style}) {
     const breakdownLevel = this.state.breakdowns.length
+    const { dimensions } = this.state
     if (rowIndex === 0) {
       return (
         <Draggable
@@ -186,21 +190,26 @@ export default class Table extends PureComponent {
         }}
         onStart={(e,data) => console.warn("start", data)}
         onDrag={(e, data) => {
-          // console.warn("movin bitch", data)
-          console.warn("test",200+data.x,data)
+          console.warn(dimensions,"movin bitch",{
+            ...dimensions,
+            [columnIndex]: {
+              width: (!_.isUndefined(dimensions[columnIndex].fixedWidth)) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
+            }
+            }, dimensions[columnIndex] && dimensions[columnIndex].fixedWidth)
+          // console.warn("test",200+data.x,data)
           this.setState({
-            i: columnIndex,
-            width: this.state.fixedWidth ? this.state.fixedWidth+(data.x*1) : 200+(data.x*1),
+            dimensions: {
+              ...dimensions,
+              [columnIndex]: {
+                width: (!_.isUndefined(dimensions[columnIndex].fixedWidth)) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
+              },
+            },
             y: data.y
           })
           Main.recomputeGridSize();
         }}
         onStop={(e,data) => {
           console.warn("stop")
-          let wid = this.state.fixedWidth ? this.state.fixedWidth+(data.x*1) : 200+(data.x*1)
-          this.setState({
-            fixedWidth: wid
-          })
         }}>
           <div className={styles.headerCell} key={key} style={{...style, color: "green"}}>
             {columns[columnIndex]}
@@ -252,3 +261,7 @@ export default class Table extends PureComponent {
   }
 
 }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
