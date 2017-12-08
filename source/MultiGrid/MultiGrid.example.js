@@ -1,20 +1,11 @@
 /** @flow */
-import Immutable from 'immutable';
-import PropTypes from 'prop-types';
 import React, {PureComponent, Children, Component} from 'react';
-import {Popover} from 'antd';
-// import 'antd/dist/antd.css';
+import { Popover } from 'antd';
+// import 'antd/lib/popover/style';
 import Draggable from 'react-draggable';
 import _ from "lodash";
-import { Resizable, ResizableBox } from 'react-resizable';
 // import 'font-awesome/css/font-awesome.min.css';
 
-import {
-  ContentBox,
-  ContentBoxHeader,
-  ContentBoxParagraph,
-} from '../demo/ContentBox';
-import {LabeledInput, InputRow} from '../demo/LabeledInput';
 import AutoSizer from '../AutoSizer';
 import MultiGrid from './MultiGrid';
 import styles from './MultiGrid.example.css';
@@ -51,10 +42,6 @@ let Main;
 // breakdown function -> takes parent values, level
 
 export default class Table extends PureComponent {
-  static contextTypes = {
-    list: PropTypes.instanceOf(Immutable.List).isRequired,
-  };
-
   transformerData = data => {
     const newData = [];
 
@@ -121,7 +108,7 @@ export default class Table extends PureComponent {
 
   componentDidMount() {
     //  transform initial data into table matrics
-    this.info = this.transformerData(processedData);
+    this.info = this.transformerData(processedData); 
   }
 
   getRowCount = () => {
@@ -133,24 +120,24 @@ export default class Table extends PureComponent {
   }
 
   getColumnWidth = (index) => {
-
+    const { dimensions } = this.state;
+    return dimensions[index] ? dimensions[index].width : 200
   }
 
   render() {
     // if info is undefiened 
     if (!this.info) return null;
     return (
-      <ContentBox>
+      <div style={{
+        margin: 10,
+        padding: 10
+      }}>
         <AutoSizer>
           {({width, height}) => {
             return (
               <MultiGrid
                 cellRenderer={this._cellRenderer}
-                columnWidth={({index}) => {
-                  const { dimensions } = this.state;
-                  console.warn("here", dimensions, index)
-                  return dimensions[index] ? dimensions[index].width : 200
-                }}
+                columnWidth={({index}) => this.getColumnWidth(index)}
                 fixedRowCount={1}
                 fixedColumnCount={this.getFixedColumnCount()}
                 columnCount={columns.length}
@@ -169,7 +156,7 @@ export default class Table extends PureComponent {
             );
           }}
         </AutoSizer>
-      </ContentBox>
+      </div>
     );
   }
 
@@ -184,22 +171,17 @@ export default class Table extends PureComponent {
       return (
         <Draggable
         axis="x"
-        handle="#test"
+        handle="#dargBar"
+        key={key}
         position={{
           x: 0,
           y: this.state.y
         }}
-        onStart={(e,data) => console.warn("start", data)}
+        onStart={(e,data) => console.warn("start")}
         onDrag={(e, data) => {
-          // console.warn(dimensions,"movin bitch",{
-          //   ...dimensions,
-          //   [columnIndex]: {
-          //     width: (!_.isUndefined(dimensions[columnIndex].fixedWidth)) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
-          //   }
-          //   }, dimensions[columnIndex] && dimensions[columnIndex].fixedWidth)
-          // console.warn("test",200+data.x,data)
-          // console.log("hey",dimensions[columnIndex], dimensions)
-          console.warn((dimensions[columnIndex] && dimensions[columnIndex].fixedWidth) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1))
+          // updates width on drag
+          // add value of x axis from the point where dragging started to default width or fixedWidth
+          // fixed width is the width of column when drag stopped
           this.setState({
             dimensions: {
               ...dimensions,
@@ -210,20 +192,9 @@ export default class Table extends PureComponent {
             },
             y: data.y
           })
-          // console.warn(columnIndex , dimensions[columnIndex] && dimensions[columnIndex].fixedWidth, dimensions[columnIndex].fixedWidth, {
-          //   dimensions: {
-          //     ...dimensions,
-          //     [columnIndex]: {
-          //       ...dimensions[columnIndex],
-          //       width: (dimensions[columnIndex] && dimensions[columnIndex].fixedWidth) ? dimensions[columnIndex].fixedWidth+(data.x*1) : 200+(data.x*1)
-          //     },
-          //   },
-          //   y: data.y
-          // })
           Main.recomputeGridSize();
         }}
         onStop={(e,data) => {
-          console.warn("stop")
           this.setState({
             dimensions: {
               ...dimensions,
@@ -234,9 +205,9 @@ export default class Table extends PureComponent {
             }
           })
         }}>
-          <div className={styles.headerCell} key={key} style={{...style, color: "green"}}>
+          <div className={styles.headerCell} style={{...style, color: "green"}}>
             {columns[columnIndex]}
-            <div  id="test" className={styles.headerResizeBar}></div>
+            <div id="dargBar" className={styles.headerResizeBar}></div>
           </div>
         </Draggable>
       );
